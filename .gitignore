@@ -1,0 +1,37 @@
+# ==============================================================================
+# GitIgnore Oficial para Spring Boot / Maven / Java 21
+# ==============================================================================
+
+# 1. Compilación y binarios
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+
+# 2. Archivos de registro y trazas
+*.log
+*.log.*
+
+# 3. Entornos de desarrollo y editores (IDEs)
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.project
+.classpath
+bin/
+
+# 4. Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 5. Archivos de respaldo y temporales
+*.tmp
+*.bak
+*~
+
+# 6. Reglas de protección local
+Compendio_soluciones.md
+Compendio_soluciones*
