@@ -61,6 +61,19 @@ public class DataInitializer implements CommandLineRunner {
                     "CLIENTE"
             );
             usuarioRepository.save(alumnoDuoc);
+
+            // 4. Usuario Vendedor (para cumplir el requerimiento de rol VENDEDOR de Anexo 1)
+            Usuario vendedor = new Usuario(
+                    "18765432-1",
+                    "Magdalena",
+                    "Zúñiga",
+                    "vendedor@milsabores.cl",
+                    "vendedor123",
+                    "+56944332211",
+                    LocalDate.of(2000, 8, 25),
+                    "VENDEDOR"
+            );
+            usuarioRepository.save(vendedor);
         }
     }
 }

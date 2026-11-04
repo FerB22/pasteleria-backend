@@ -2,12 +2,13 @@
 -- Script de Datos de Prueba Iniciales: Pastelería Mil Sabores
 -- ==============================================================================
 
--- 1. Usuarios (Administrador, Cliente Senior y Estudiante Duoc UC)
+-- 1. Usuarios (Administrador, Cliente Senior, Estudiante Duoc UC y Vendedor)
 INSERT INTO usuarios (rut, nombre, apellido, email, password, telefono, fecha_nacimiento, rol)
 VALUES 
 ('11111111-1', 'Alonso', 'Contreras', 'admin@milsabores.cl', 'admin123', '+56911223344', '1995-03-15', 'ADMIN'),
 ('15345678-5', 'Marta', 'González', 'marta.gonzalez@gmail.com', 'marta2026', '+56987654321', '1968-05-20', 'CLIENTE'),
-('20123456-7', 'Fernando', 'Barra', 'f.barra@alumnos.duoc.cl', 'duoc2026', '+56955667788', '2003-10-15', 'CLIENTE');
+('20123456-7', 'Fernando', 'Barra', 'f.barra@alumnos.duoc.cl', 'duoc2026', '+56955667788', '2003-10-15', 'CLIENTE'),
+('18765432-1', 'Magdalena', 'Zúñiga', 'vendedor@milsabores.cl', 'vendedor123', '+56944332211', '2000-08-25', 'VENDEDOR');
 
 -- 2. Catálogo inicial de pastelería (para Benjamín)
 INSERT INTO productos (codigo, nombre, descripcion, precio, stock, categoria, imagen_url)
