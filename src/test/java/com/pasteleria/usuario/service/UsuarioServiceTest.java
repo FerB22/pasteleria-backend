@@ -116,4 +116,60 @@ class UsuarioServiceTest {
         assertEquals(10, beneficios.get("descuentoPorcentaje"));
         assertEquals("Torta gratis de cumpleaños aplicable en el mes natal", beneficios.get("beneficioDuocCumpleanos"));
     }
+
+    @Test
+    @DisplayName("Debe rechazar el registro de usuarios con fecha de nacimiento futura")
+    void testRechazarFechaNacimientoFutura() {
+        Usuario usuarioFuturo = new Usuario(
+                "15345678-5",
+                "Juan",
+                "Pérez",
+                "juan.perez@gmail.com",
+                "claveSegura2026",
+                "+56911223344",
+                LocalDate.now().plusDays(5),
+                "CLIENTE"
+        );
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                usuarioService.registrarUsuario(usuarioFuturo)
+        );
+        assertTrue(ex.getMessage().contains("futura"));
+    }
+
+    @Test
+    @DisplayName("Debe rechazar el registro con contraseña menor a 6 caracteres o en blanco")
+    void testRechazarPasswordDebil() {
+        Usuario usuarioClaveCorta = new Usuario(
+                "15345678-5",
+                "Juan",
+                "Pérez",
+                "juan.perez@gmail.com",
+                "123",
+                "+56911223344",
+                LocalDate.of(1995, 3, 20),
+                "CLIENTE"
+        );
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                usuarioService.registrarUsuario(usuarioClaveCorta)
+        );
+        assertTrue(ex.getMessage().contains("al menos 6 caracteres"));
+    }
+
+    @Test
+    @DisplayName("Debe reconocer correos institucionales de Duoc UC para docentes y estudiantes")
+    void testReconocerDominiosInstitucionalesDuoc() {
+        Usuario docente = new Usuario(
+                "15345678-5",
+                "Profesor",
+                "Duoc",
+                "docente@profesor.duoc.cl",
+                "claveDocente2026",
+                "+56911223344",
+                LocalDate.of(1980, 5, 12),
+                "CLIENTE"
+        );
+        assertTrue(docente.esUsuarioDuoc());
+    }
 }

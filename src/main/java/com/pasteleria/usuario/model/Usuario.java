@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
@@ -68,6 +69,7 @@ public class Usuario {
     private String telefono;
 
     @NotNull(message = "La fecha de nacimiento es obligatoria")
+    @Past(message = "La fecha de nacimiento debe ser anterior a la fecha actual")
     @Column(name = "fecha_nacimiento", nullable = false)
     @Schema(description = "Fecha de nacimiento para cálculo dinámico de beneficios (AAAA-MM-DD)", example = "2003-05-15")
     private LocalDate fechaNacimiento;
@@ -125,13 +127,17 @@ public class Usuario {
 
     /**
      * Determina si el usuario posee correo institucional Duoc UC.
+     * Admite estudiantes (@alumnos.duoc.cl), docentes (@profesor.duoc.cl) e institucionales (@duocuc.cl, @duoc.cl).
      */
     public boolean esUsuarioDuoc() {
         if (this.email == null || this.email.isBlank()) {
             return false;
         }
         String correoLimpio = this.email.trim().toLowerCase();
-        return correoLimpio.endsWith("@duocuc.cl") || correoLimpio.endsWith("@alumnos.duoc.cl");
+        return correoLimpio.endsWith("@duocuc.cl")
+                || correoLimpio.endsWith("@alumnos.duoc.cl")
+                || correoLimpio.endsWith("@profesor.duoc.cl")
+                || correoLimpio.endsWith("@duoc.cl");
     }
 
     // Getters y Setters

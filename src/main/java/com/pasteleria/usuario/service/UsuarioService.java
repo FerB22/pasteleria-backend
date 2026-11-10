@@ -39,7 +39,8 @@ public class UsuarioService {
             "icloud.com",
             "duocuc.cl",
             "alumnos.duoc.cl",
-            "profesor.duoc.cl"
+            "profesor.duoc.cl",
+            "duoc.cl"
     );
 
     public UsuarioService(UsuarioRepository usuarioRepository) {
@@ -139,12 +140,29 @@ public class UsuarioService {
             throw new IllegalArgumentException("Los datos del usuario no pueden ser nulos");
         }
 
-        // Validación estricta de RUT chileno
+        // 1. Validación de campos obligatorios mediante .isBlank() de Java 21
+        if (usuario.getNombre() == null || usuario.getNombre().isBlank()) {
+            throw new IllegalArgumentException("El nombre es obligatorio y no puede contener únicamente espacios");
+        }
+        if (usuario.getApellido() == null || usuario.getApellido().isBlank()) {
+            throw new IllegalArgumentException("El apellido es obligatorio y no puede contener únicamente espacios");
+        }
+        if (usuario.getPassword() == null || usuario.getPassword().isBlank() || usuario.getPassword().length() < 6) {
+            throw new IllegalArgumentException("La contraseña es obligatoria y debe tener al menos 6 caracteres");
+        }
+        if (usuario.getFechaNacimiento() == null) {
+            throw new IllegalArgumentException("La fecha de nacimiento es obligatoria");
+        }
+        if (usuario.getFechaNacimiento().isAfter(java.time.LocalDate.now())) {
+            throw new IllegalArgumentException("La fecha de nacimiento no puede ser una fecha futura");
+        }
+
+        // 2. Validación estricta de RUT chileno
         if (!validarRutChileno(usuario.getRut())) {
             throw new IllegalArgumentException("El RUT ingresado (" + usuario.getRut() + ") es inválido según el algoritmo Módulo 11");
         }
 
-        // Validación de correo electrónico
+        // 3. Validación de correo electrónico
         if (!validarEmail(usuario.getEmail())) {
             throw new IllegalArgumentException("El correo electrónico ingresado no posee un formato válido");
         }
