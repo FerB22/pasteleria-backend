@@ -1,5 +1,6 @@
 package com.pasteleria.usuario.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -60,7 +61,9 @@ public class Usuario {
     @NotBlank(message = "La contraseña es obligatoria")
     @Size(min = 6, max = 255, message = "La contraseña debe tener al menos 6 caracteres")
     @Column(name = "password", nullable = false, length = 255)
-    @Schema(description = "Contraseña de acceso al sistema", example = "contrasenaSegura2026")
+    // WRITE_ONLY: se acepta al registrar, pero nunca se devuelve en las respuestas JSON (guarda el hash BCrypt)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(description = "Contraseña de acceso al sistema (se almacena cifrada con BCrypt)", example = "contrasenaSegura2026", accessMode = Schema.AccessMode.WRITE_ONLY)
     private String password;
 
     @Size(max = 20, message = "El teléfono no debe exceder 20 caracteres")

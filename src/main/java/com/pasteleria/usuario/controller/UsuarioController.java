@@ -1,6 +1,8 @@
 package com.pasteleria.usuario.controller;
 
 import com.pasteleria.usuario.model.Usuario;
+import com.pasteleria.usuario.security.JwtService;
+import com.pasteleria.usuario.security.UsuarioAutenticado;
 import com.pasteleria.usuario.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,6 +16,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,9 +45,21 @@ import java.util.Map;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final JwtService jwtService;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, JwtService jwtService) {
         this.usuarioService = usuarioService;
+        this.jwtService = jwtService;
+    }
+
+    /** Arma la respuesta de autenticación: token JWT, vigencia y datos públicos del usuario. */
+    private Map<String, Object> respuestaConToken(Usuario usuario) {
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("token", jwtService.generarToken(usuario));
+        respuesta.put("tipo", "Bearer");
+        respuesta.put("expiraEnMs", jwtService.getExpiracionMs());
+        respuesta.put("usuario", usuario);
+        return respuesta;
     }
 
     @PostMapping("/registro")
@@ -76,13 +92,13 @@ public class UsuarioController {
     @PostMapping("/login")
     @Operation(
             summary = "Autenticar credenciales de usuario",
-            description = "Valida el correo y contraseña contra la base de datos relacional. Retorna la entidad del usuario con su rol asignado (ADMIN, VENDEDOR o CLIENTE)."
+            description = "Valida el correo y contraseña (hash BCrypt) contra la base de datos. Retorna un token JWT firmado (válido 1 hora) junto con los datos del usuario y su rol (ADMIN, VENDEDOR o CLIENTE). Use el token en el botón Authorize de Swagger."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Autenticación satisfactoria",
-                    content = @Content(schema = @Schema(implementation = Usuario.class))),
-            @ApiResponse(responseCode = "401", description = "Credenciales incorrectas (correo no encontrado o contraseña errónea)",
-                    content = @Content(examples = @ExampleObject(value = "{\"error\": \"Credenciales inválidas: contraseña incorrecta\"}"))),
+            @ApiResponse(responseCode = "200", description = "Autenticación satisfactoria: retorna token JWT y usuario",
+                    content = @Content(examples = @ExampleObject(value = "{\"token\": \"eyJhbGciOiJIUzI1NiJ9...\", \"tipo\": \"Bearer\", \"expiraEnMs\": 3600000, \"usuario\": {\"id\": 1, \"nombre\": \"Alonso\", \"rol\": \"ADMIN\"}}"))),
+            @ApiResponse(responseCode = "401", description = "Credenciales incorrectas",
+                    content = @Content(examples = @ExampleObject(value = "{\"error\": \"Credenciales inválidas\"}"))),
             @ApiResponse(responseCode = "400", description = "Parámetros de login incompletos o en blanco")
     })
     public ResponseEntity<?> login(
@@ -96,10 +112,32 @@ public class UsuarioController {
             String email = credenciales.get("email");
             String password = credenciales.get("password");
             Usuario usuario = usuarioService.autenticar(email, password);
-            return ResponseEntity.ok(usuario);
+            return ResponseEntity.ok(respuestaConToken(usuario));
         } catch (IllegalArgumentException e) {
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
+    }
+
+    @PostMapping("/refresh")
+    @Operation(
+            summary = "Renovar token JWT",
+            description = "Recibe un token todavía vigente (cabecera Authorization) y emite uno nuevo con el rol actual del usuario en base de datos."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Token renovado"),
+            @ApiResponse(responseCode = "401", description = "Token ausente, inválido o expirado")
+    })
+    @SecurityRequirement(name = "Bearer Authentication")
+    public ResponseEntity<?> renovarToken(Authentication authentication) {
+        UsuarioAutenticado actual = (UsuarioAutenticado) authentication.getPrincipal();
+        try {
+            Usuario usuario = usuarioService.obtenerPorId(actual.getId());
+            return ResponseEntity.ok(respuestaConToken(usuario));
+        } catch (IllegalArgumentException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "El usuario del token ya no existe");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
     }
@@ -125,6 +163,8 @@ public class UsuarioController {
                     content = @Content(schema = @Schema(implementation = Usuario.class))),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado para el ID suministrado")
     })
+    @SecurityRequirement(name = "Bearer Authentication")
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     public ResponseEntity<?> buscarPorId(
             @Parameter(description = "Identificador único del usuario", example = "1", required = true)
             @PathVariable Long id) {
@@ -147,6 +187,8 @@ public class UsuarioController {
                     content = @Content(examples = @ExampleObject(value = "{\n  \"usuarioId\": 2,\n  \"nombreCompleto\": \"Marta González\",\n  \"edadCalculada\": 58,\n  \"descuentoPorcentaje\": 50,\n  \"motivoDescuento\": \"Beneficio 50 aniversario: Cliente con 50 años o más\",\n  \"beneficioDuocCumpleanos\": \"No aplica convenio Duoc UC\"\n}"))),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
+    @SecurityRequirement(name = "Bearer Authentication")
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     public ResponseEntity<?> consultarBeneficios(
             @Parameter(description = "Identificador único del usuario", example = "2", required = true)
             @PathVariable Long id,
@@ -174,6 +216,7 @@ public class UsuarioController {
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
     })
     @SecurityRequirement(name = "Bearer Authentication")
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     public ResponseEntity<?> actualizar(
             @Parameter(description = "Identificador único del usuario a actualizar", example = "1", required = true)
             @PathVariable Long id,

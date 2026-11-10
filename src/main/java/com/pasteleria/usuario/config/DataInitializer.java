@@ -3,6 +3,7 @@ package com.pasteleria.usuario.config;
 import com.pasteleria.usuario.model.Usuario;
 import com.pasteleria.usuario.repository.UsuarioRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -15,13 +16,34 @@ import java.time.LocalDate;
 public class DataInitializer implements CommandLineRunner {
 
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DataInitializer(UsuarioRepository usuarioRepository) {
+    public DataInitializer(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(String... args) {
+        sembrarUsuarios();
+        cifrarContrasenasPendientes();
+    }
+
+    /**
+     * Cifra con BCrypt cualquier contraseña que aún esté en texto plano (las del data.sql
+     * y las de los usuarios de prueba). Los hashes BCrypt empiezan con "$2", por lo que
+     * un hash ya cifrado nunca se vuelve a cifrar.
+     */
+    private void cifrarContrasenasPendientes() {
+        usuarioRepository.findAll().forEach(u -> {
+            if (!u.getPassword().startsWith("$2")) {
+                u.setPassword(passwordEncoder.encode(u.getPassword()));
+                usuarioRepository.save(u);
+            }
+        });
+    }
+
+    private void sembrarUsuarios() {
         if (usuarioRepository.count() == 0) {
             // 1. Usuario Administrador de la pastelería
             Usuario admin = new Usuario(

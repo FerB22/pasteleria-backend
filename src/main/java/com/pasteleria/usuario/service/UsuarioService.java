@@ -2,6 +2,7 @@ package com.pasteleria.usuario.service;
 
 import com.pasteleria.usuario.model.Usuario;
 import com.pasteleria.usuario.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +22,7 @@ import java.util.regex.Pattern;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-
+    private final PasswordEncoder passwordEncoder;
     // Expresión regular de máxima restricción:
     // 1. Usuario local: mínimo 3 caracteres alfanuméricos (rechaza 'f')
     // 2. Segmentos de dominio: mínimo 2 caracteres por etiqueta (rechaza 'j.j')
@@ -43,8 +44,9 @@ public class UsuarioService {
             "duoc.cl"
     );
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -181,6 +183,10 @@ public class UsuarioService {
         // Normalización antes de persistir
         usuario.setRut(rutLimpio);
         usuario.setEmail(emailLimpio);
+        // El registro público siempre crea CLIENTE: evita que alguien se asigne el rol ADMIN desde el JSON
+        usuario.setRol("CLIENTE");
+        // La contraseña nunca se guarda en texto plano: se almacena su hash BCrypt
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
 
         return usuarioRepository.save(usuario);
     }
@@ -195,11 +201,12 @@ public class UsuarioService {
         }
 
         String emailLimpio = email.trim().toLowerCase();
+        // Mensaje único para correo inexistente y clave errónea: no revela qué correos están registrados
         Usuario usuario = usuarioRepository.findByEmail(emailLimpio)
-                .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas: usuario no encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
 
-        if (!usuario.getPassword().equals(password)) {
-            throw new IllegalArgumentException("Credenciales inválidas: contraseña incorrecta");
+        if (!passwordEncoder.matches(password, usuario.getPassword())) {
+            throw new IllegalArgumentException("Credenciales inválidas");
         }
 
         return usuario;
