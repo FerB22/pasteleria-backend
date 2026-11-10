@@ -59,7 +59,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers(
                             "/swagger-ui.html", "/swagger-ui/**", "/api-docs/**", "/v3/api-docs/**",
-                            "/h2-console/**").permitAll();
+                            "/h2-console/**", "/error").permitAll();
                     auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
                     for (String base : BASES) {
                         auth.requestMatchers(HttpMethod.POST, base + "/registro", base + "/login").permitAll();

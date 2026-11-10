@@ -255,4 +255,20 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
     }
+
+    /**
+     * Captura las violaciones de validación de Bean Validation (@Valid en el cuerpo de la petición)
+     * y retorna un código HTTP 400 Bad Request con el mensaje descriptivo del fallo.
+     */
+    @org.springframework.web.bind.annotation.ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> manejarValidaciones(org.springframework.web.bind.MethodArgumentNotValidException ex) {
+        Map<String, String> error = new HashMap<>();
+        String mensaje = ex.getBindingResult().getFieldErrors().stream()
+                .map(err -> err.getDefaultMessage())
+                .filter(msg -> msg != null && !msg.isBlank())
+                .findFirst()
+                .orElse("Datos de entrada inválidos");
+        error.put("error", mensaje);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 }
