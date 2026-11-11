@@ -67,6 +67,13 @@ public class SecurityConfig {
                         auth.requestMatchers(HttpMethod.DELETE, base + "/**").hasRole("ADMIN");
                         auth.requestMatchers(base + "/**").authenticated();
                     }
+                    // Catálogo público de productos (consulta abierta; gestión reservada a ADMIN o VENDEDOR)
+                    auth.requestMatchers(HttpMethod.GET,
+                            "/api/productos", "/api/productos/**",
+                            "/api/v1/productos", "/api/v1/productos/**").permitAll();
+                    auth.requestMatchers(
+                            "/api/productos", "/api/productos/**",
+                            "/api/v1/productos", "/api/v1/productos/**").hasAnyRole("ADMIN", "VENDEDOR");
                     auth.anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
