@@ -56,6 +56,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Conector PostgreSQL: Para persistencia real con perfil 'postgres' -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- 6. Swagger / OpenAPI 3: Documentación interactiva y pruebas web en /swagger-ui.html -->
         <dependency>
             <groupId>org.springdoc</groupId>
