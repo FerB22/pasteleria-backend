@@ -1,7 +1,5 @@
--- ==============================================================================
 -- Script de Creación de Base de Datos Relacional: Pastelería Mil Sabores
 -- Plataforma: MySQL / MariaDB (XAMPP) y compatible con H2 en memoria
--- ==============================================================================
 
 CREATE TABLE IF NOT EXISTS usuarios (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

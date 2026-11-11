@@ -60,7 +60,7 @@ public class DataInitializer implements CommandLineRunner {
 
             // 2. Cliente mayor de 50 años (para probar el 50 % de descuento por bodas de oro)
             Usuario clienteSenior = new Usuario(
-                    "15345678-5",
+                    "15345678-K",
                     "Marta",
                     "González",
                     "marta.gonzalez@gmail.com",
@@ -73,7 +73,7 @@ public class DataInitializer implements CommandLineRunner {
 
             // 3. Cliente alumno Duoc UC (para probar el beneficio de torta de cumpleaños gratis)
             Usuario alumnoDuoc = new Usuario(
-                    "20123456-7",
+                    "20123456-5",
                     "Fernando",
                     "Barra",
                     "f.barra@alumnos.duoc.cl",

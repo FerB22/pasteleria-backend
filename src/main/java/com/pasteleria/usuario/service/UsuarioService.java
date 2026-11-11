@@ -275,6 +275,12 @@ public class UsuarioService {
         if (datosActualizados.getFechaNacimiento() != null) {
             existente.setFechaNacimiento(datosActualizados.getFechaNacimiento());
         }
+        if (datosActualizados.getPassword() != null && !datosActualizados.getPassword().isBlank()) {
+            if (datosActualizados.getPassword().length() < 6) {
+                throw new IllegalArgumentException("La contraseña debe tener al menos 6 caracteres");
+            }
+            existente.setPassword(passwordEncoder.encode(datosActualizados.getPassword()));
+        }
 
         return usuarioRepository.save(existente);
     }

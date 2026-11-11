@@ -226,4 +226,21 @@ class UsuarioServiceTest {
         assertEquals("CLIENTE", guardado.getRol());
         assertEquals("$2a$10$cifrado", guardado.getPassword());
     }
+
+    @Test
+    @DisplayName("Al actualizar datos personales con nueva contraseña válida se cifra con BCrypt")
+    void testActualizarUsuarioCifraNuevaPassword() {
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioDuoc));
+        when(passwordEncoder.encode("nuevaClave2026")).thenReturn("$2a$10$nuevoHash");
+        when(usuarioRepository.save(usuarioDuoc)).thenReturn(usuarioDuoc);
+
+        Usuario cambios = new Usuario();
+        cambios.setNombre("Fernando Andrés");
+        cambios.setPassword("nuevaClave2026");
+
+        Usuario actualizado = usuarioService.actualizarUsuario(1L, cambios);
+
+        assertEquals("Fernando Andrés", actualizado.getNombre());
+        assertEquals("$2a$10$nuevoHash", actualizado.getPassword());
+    }
 }
