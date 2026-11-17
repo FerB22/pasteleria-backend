@@ -11,10 +11,10 @@ VALUES
 -- 2. Catálogo inicial de pastelería (para Benjamín)
 INSERT INTO productos (codigo, nombre, descripcion, precio, stock, categoria, imagen_url)
 VALUES 
-('TOR-001', 'Torta Mil Hojas Manjar', 'Capas crujientes de hojarasca con manjar casero', 22500, 15, 'Tortas Tradicionales', '/img/milhojas.jpg'),
-('TOR-002', 'Torta Selva Negra', 'Bizcocho de chocolate con crema chantilly y guindas', 24990, 10, 'Tortas Especiales', '/img/selvanegra.jpg'),
-('PAS-001', 'Pie de Limón Merengado', 'Masa quebrada con crema de limón de pica y merengue suizo', 14500, 20, 'Tartas y Pies', '/img/pielimon.jpg'),
-('PAS-002', 'Cheesecake Frutos Rojos', 'Base de galleta con crema de queso y salsa de frambuesas', 18900, 12, 'Postres', '/img/cheesecake.jpg');
+('TOR-001', 'Torta Mil Hojas Manjar', 'Capas crujientes de hojarasca con manjar casero', 22500, 15, 'Tortas Tradicionales', '/images/torta-circular-manjar.jpg'),
+('TOR-002', 'Torta Selva Negra', 'Bizcocho de chocolate con crema chantilly y guindas', 24990, 10, 'Tortas Especiales', '/images/torta-cuadrada-chocolate.jpg'),
+('PAS-001', 'Pie de Limón Merengado', 'Masa quebrada con crema de limón de pica y merengue suizo', 14500, 20, 'Tartas y Pies', '/images/tarta-santiago.jpg'),
+('PAS-002', 'Cheesecake Frutos Rojos', 'Base de galleta con crema de queso y salsa de frambuesas', 18900, 12, 'Postres', '/images/cheesecake-sin-azucar.jpg');
 
 -- 3. Pedido de ejemplo (para Alonso y Magdalena)
 INSERT INTO pedidos (usuario_id, estado, total, descuento_aplicado, direccion_despacho, metodo_pago)

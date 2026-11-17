@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -29,19 +28,6 @@ public class UsuarioService {
     // 3. Prohíbe puntos consecutivos ('..')
     private static final Pattern EMAIL_STRICT_PATTERN = Pattern.compile(
             "^(?!.*\\.\\.)[a-zA-Z0-9][a-zA-Z0-9._%+-]{2,63}@[a-zA-Z0-9](?:[a-zA-Z0-9-]{1,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z]{2,6})+$"
-    );
-
-    // Lista blanca opcional de dominios autorizados (política de máxima restricción)
-    private static final java.util.Set<String> DOMINIOS_AUTORIZADOS = java.util.Set.of(
-            "gmail.com",
-            "outlook.com",
-            "hotmail.com",
-            "yahoo.com",
-            "icloud.com",
-            "duocuc.cl",
-            "alumnos.duoc.cl",
-            "profesor.duoc.cl",
-            "duoc.cl"
     );
 
     public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
