@@ -6,8 +6,10 @@ import com.pasteleria.pedido.model.PedidoRequest;
 import com.pasteleria.pedido.repository.PedidoRepository;
 import com.pasteleria.usuario.model.Usuario;
 import com.pasteleria.usuario.repository.UsuarioRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -28,7 +30,8 @@ public class PedidoService {
 
     public Pedido obtenerPorId(Long id) {
         return pedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido no encontrado con ID: " + id));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Pedido no encontrado con ID: " + id));
     }
 
     public List<Pedido> obtenerPorUsuario(Long usuarioId) {
@@ -38,7 +41,8 @@ public class PedidoService {
     @Transactional
     public Pedido crearPedido(PedidoRequest request) {
         Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + request.getUsuarioId()));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Usuario no encontrado con ID: " + request.getUsuarioId()));
 
         Pedido pedido = new Pedido();
         pedido.setUsuario(usuario);

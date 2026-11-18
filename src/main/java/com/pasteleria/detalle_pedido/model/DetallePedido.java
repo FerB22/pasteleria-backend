@@ -1,6 +1,7 @@
 package com.pasteleria.detalle_pedido.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pasteleria.pedido.model.Pedido;
 import com.pasteleria.producto.model.Producto;
 import jakarta.persistence.*;
@@ -13,6 +14,8 @@ public class DetallePedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // No se envía al front: incluye al usuario con su contraseña
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "pedido_id", nullable = false)
     private Pedido pedido;
@@ -30,6 +33,10 @@ public class DetallePedido {
     @Column(nullable = false)
     private Integer subtotal;
 
+    // Mensaje que el cliente pide escribir en la torta
+    @Column(length = 255)
+    private String dedicatoria;
+
     public DetallePedido() {}
 
     // Getters y Setters
@@ -38,6 +45,9 @@ public class DetallePedido {
 
     public Pedido getPedido() { return pedido; }
     public void setPedido(Pedido pedido) { this.pedido = pedido; }
+
+    // El front solo recibe el id del pedido
+    public Long getPedidoId() { return pedido != null ? pedido.getId() : null; }
 
     public Producto getProducto() { return producto; }
     public void setProducto(Producto producto) { this.producto = producto; }
@@ -50,4 +60,7 @@ public class DetallePedido {
 
     public Integer getSubtotal() { return subtotal; }
     public void setSubtotal(Integer subtotal) { this.subtotal = subtotal; }
+
+    public String getDedicatoria() { return dedicatoria; }
+    public void setDedicatoria(String dedicatoria) { this.dedicatoria = dedicatoria; }
 }

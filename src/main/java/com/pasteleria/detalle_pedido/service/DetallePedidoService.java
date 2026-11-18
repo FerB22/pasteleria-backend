@@ -11,6 +11,7 @@ import com.pasteleria.producto.repository.ProductoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -33,7 +34,7 @@ public class DetallePedidoService {
         if (!pedidoRepository.existsById(pedidoId)) {
             throw new IllegalArgumentException("Pedido no encontrado con ID: " + pedidoId);
         }
-        return detallePedidoRepository.findByPedidoId(pedidoId);
+        return detallePedidoRepository.findByPedido_Id(pedidoId);
     }
 
     // 2. Ver una línea por su ID
@@ -71,6 +72,7 @@ public class DetallePedidoService {
         detalle.setCantidad(request.getCantidad());
         detalle.setPrecioUnitario(producto.getPrecio());
         detalle.setSubtotal(producto.getPrecio() * request.getCantidad());
+        detalle.setDedicatoria(request.getDedicatoria());
 
         // 3.6 Descontar stock
         producto.setStock(producto.getStock() - request.getCantidad());
@@ -81,6 +83,20 @@ public class DetallePedidoService {
         recalcularTotal(pedido);
 
         return guardado;
+    }
+
+    // 3b. Agregar todo el carrito de una vez
+    // Si un producto falla (sin stock, no existe), se deshace todo
+    @Transactional
+    public List<DetallePedido> agregarVarios(List<DetallePedidoRequest> requests) {
+        if (requests == null || requests.isEmpty()) {
+            throw new IllegalStateException("El carrito no tiene productos");
+        }
+        List<DetallePedido> guardados = new ArrayList<>();
+        for (DetallePedidoRequest r : requests) {
+            guardados.add(agregarDetalle(r));
+        }
+        return guardados;
     }
 
     // 4. Quitar una línea del pedido
@@ -104,7 +120,7 @@ public class DetallePedidoService {
 
     // 5. Sumar todas las líneas y aplicar el descuento del pedido
     private void recalcularTotal(Pedido pedido) {
-        List<DetallePedido> detalles = detallePedidoRepository.findByPedidoId(pedido.getId());
+        List<DetallePedido> detalles = detallePedidoRepository.findByPedido_Id(pedido.getId());
 
         int suma = 0;
         for (DetallePedido d : detalles) {

@@ -10,17 +10,26 @@ public class Producto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Código visible del producto (ej: TC001). Es el mismo que usa el frontend.
+    @Column(nullable = false, unique = true, length = 50)
+    private String codigo;
+
     private String nombre;
     private String descripcion;
     private Integer precio;
     private Integer stock;
     private String categoria;
 
+    // Ruta o enlace de la imagen (ej: /images/torta-cuadrada-chocolate.jpg)
+    @Column(name = "imagen_url")
+    private String imagenUrl;
+
     // Constructor vacío
     public Producto() {}
 
     // Constructor con parámetros
-    public Producto(String nombre, String descripcion, Integer precio, Integer stock, String categoria) {
+    public Producto(String codigo, String nombre, String descripcion, Integer precio, Integer stock, String categoria) {
+        this.codigo = codigo;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
@@ -35,6 +44,14 @@ public class Producto {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
 
     public String getNombre() {
@@ -75,5 +92,13 @@ public class Producto {
 
     public void setCategoria(String categoria) {
         this.categoria = categoria;
+    }
+
+    public String getImagenUrl() {
+        return imagenUrl;
+    }
+
+    public void setImagenUrl(String imagenUrl) {
+        this.imagenUrl = imagenUrl;
     }
 }

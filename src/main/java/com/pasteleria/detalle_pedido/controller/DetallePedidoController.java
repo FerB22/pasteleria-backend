@@ -60,6 +60,20 @@ public class DetallePedidoController {
         }
     }
 
+    @PostMapping("/lote")
+    @Operation(summary = "Agregar todos los productos del carrito a un pedido",
+            description = "Si un producto falla, no se guarda ninguno y el stock queda como estaba")
+    public ResponseEntity<?> agregarVarios(@RequestBody List<@Valid DetallePedidoRequest> requests) {
+        try {
+            List<DetallePedido> nuevos = detallePedidoService.agregarVarios(requests);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevos);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @DeleteMapping("/{id}")
     @Operation(summary = "Quitar un producto del pedido",
             description = "Devuelve el stock y recalcula el total del pedido")

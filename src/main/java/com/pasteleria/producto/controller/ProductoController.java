@@ -10,7 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.dao.DataIntegrityViolationException;
+
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/productos")
@@ -39,7 +43,7 @@ public class ProductoController {
             Producto nuevoProducto = productoService.crearProducto(producto);
             return new ResponseEntity<>(nuevoProducto, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -48,18 +52,23 @@ public class ProductoController {
         try {
             Producto productoActualizado = productoService.actualizarProducto(id, detalles);
             return ResponseEntity.ok(productoActualizado);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
         try {
             productoService.eliminarProducto(id);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", "No se puede eliminar: el producto aparece en pedidos registrados."));
         }
     }
 }
