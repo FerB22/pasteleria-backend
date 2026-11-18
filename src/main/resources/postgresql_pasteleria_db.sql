@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS detalle_pedidos (
     cantidad INT NOT NULL,
     precio_unitario INT NOT NULL,
     subtotal INT NOT NULL,
+    dedicatoria VARCHAR(255),
     CONSTRAINT fk_detalles_pedido FOREIGN KEY (pedido_id) REFERENCES pedidos (id) ON DELETE CASCADE,
     CONSTRAINT fk_detalles_producto FOREIGN KEY (producto_id) REFERENCES productos (id) ON DELETE RESTRICT
 );

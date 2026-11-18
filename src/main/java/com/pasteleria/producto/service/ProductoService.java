@@ -76,6 +76,8 @@ public class ProductoService {
             throw new NoSuchElementException("No se puede eliminar: producto no encontrado con el ID: " + id);
         }
         productoRepository.deleteById(id);
+        // Fuerza el SQL DELETE dentro del servicio para capturar violaciones de FK en el controlador
+        productoRepository.flush();
     }
 
     private void validarDatosProducto(Producto producto) {

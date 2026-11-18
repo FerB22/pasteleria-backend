@@ -2,6 +2,7 @@ package com.pasteleria.detalle_pedido.model;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class DetallePedidoRequest {
 
@@ -15,6 +16,9 @@ public class DetallePedidoRequest {
     @Min(value = 1, message = "La cantidad debe ser al menos 1")
     private Integer cantidad;
 
+    @Size(max = 255, message = "La dedicatoria no debe superar los 255 caracteres")
+    private String dedicatoria;
+
     public DetallePedidoRequest() {}
 
     // Getters y Setters
@@ -26,4 +30,7 @@ public class DetallePedidoRequest {
 
     public Integer getCantidad() { return cantidad; }
     public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
+
+    public String getDedicatoria() { return dedicatoria; }
+    public void setDedicatoria(String dedicatoria) { this.dedicatoria = dedicatoria; }
 }

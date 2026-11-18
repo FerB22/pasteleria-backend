@@ -144,4 +144,46 @@ class DetallePedidoServiceTest {
         verify(detallePedidoRepository).delete(detalle);
         verify(productoRepository).save(producto);
     }
+
+    @Test
+    void testAgregarVariosEnLoteGuardaTodasLasLineasYDedicatoria() {
+        Pedido pedido = new Pedido();
+        pedido.setId(1L);
+        pedido.setEstado(EstadoPedido.PENDIENTE);
+        pedido.setDescuentoAplicado(0);
+
+        Producto producto = new Producto();
+        producto.setId(2L);
+        producto.setNombre("Torta Tres Leches");
+        producto.setPrecio(20000);
+        producto.setStock(10);
+
+        DetallePedidoRequest req = new DetallePedidoRequest();
+        req.setPedidoId(1L);
+        req.setProductoId(2L);
+        req.setCantidad(2);
+        req.setDedicatoria("Feliz cumpleaños");
+
+        when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
+        when(productoRepository.findById(2L)).thenReturn(Optional.of(producto));
+        when(detallePedidoRepository.save(any(DetallePedido.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(detallePedidoRepository.findByPedidoId(1L)).thenAnswer(inv -> {
+            DetallePedido d = new DetallePedido();
+            d.setSubtotal(40000);
+            return List.of(d);
+        });
+
+        List<DetallePedido> guardados = detallePedidoService.agregarVarios(List.of(req));
+
+        assertEquals(1, guardados.size());
+        assertEquals("Feliz cumpleaños", guardados.get(0).getDedicatoria());
+        assertEquals(8, producto.getStock());
+        assertEquals(40000, pedido.getTotal());
+    }
+
+    @Test
+    void testAgregarVariosListaVaciaLanzaExcepcion() {
+        assertThrows(IllegalStateException.class, () -> detallePedidoService.agregarVarios(List.of()));
+        verify(detallePedidoRepository, never()).save(any());
+    }
 }

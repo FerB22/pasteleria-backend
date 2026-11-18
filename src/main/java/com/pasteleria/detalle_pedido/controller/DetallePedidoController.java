@@ -94,6 +94,34 @@ public class DetallePedidoController {
         }
     }
 
+    @PostMapping("/lote")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Agregar todos los productos del carrito a un pedido",
+            description = "Si un producto falla, no se guarda ninguno y el stock queda como estaba")
+    public ResponseEntity<?> agregarVarios(
+            @RequestBody List<@Valid DetallePedidoRequest> requests,
+            @AuthenticationPrincipal UsuarioAutenticado principal) {
+        if (requests == null || requests.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "El carrito no tiene productos"));
+        }
+        try {
+            for (DetallePedidoRequest req : requests) {
+                Pedido pedido = pedidoService.obtenerPorId(req.getPedidoId());
+                if (!esStaffOPropietario(principal, pedido.getUsuario().getId())) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(Map.of("error", "Acceso denegado: no puedes modificar un pedido ajeno"));
+                }
+            }
+            List<DetallePedido> nuevos = detallePedidoService.agregarVarios(requests);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevos);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Quitar un producto del pedido",
