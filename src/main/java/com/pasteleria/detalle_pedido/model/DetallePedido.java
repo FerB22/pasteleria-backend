@@ -46,7 +46,8 @@ public class DetallePedido {
     public Pedido getPedido() { return pedido; }
     public void setPedido(Pedido pedido) { this.pedido = pedido; }
 
-    // El front solo recibe el id del pedido
+    // El front solo recibe el id del pedido (transitorio para evitar conflicto en Spring Data JPA)
+    @Transient
     public Long getPedidoId() { return pedido != null ? pedido.getId() : null; }
 
     public Producto getProducto() { return producto; }
